@@ -22,7 +22,7 @@ condenseGsea takes a data.frame that must have a column with genes. Those could 
 library(gseaCondenser)
 
 gsea <- gseaCondenser::myGsea                 # data set built into this package for demonstration purposes
-gsea <- condense_gsea(gsea, similarity=0.3)   # here we use a very low similarity threshold. 0.8-1 might be more appropriate in many cases
+gsea <- condenseGsea(gsea, similarity=0.3)   # here we use a very low similarity threshold. 0.8-1 might be more appropriate in many cases
 head(gsea)
 ```
 
