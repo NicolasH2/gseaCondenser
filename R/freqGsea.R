@@ -16,7 +16,7 @@
 #' library(wordcloud2)
 #'
 #' myfreq <- freqGsea(names(gseaCondenser::mySetlist))
-#' wordcloud2::wordcloud2(myfreq)
+#' wordcloud2(myfreq)
 freqGsea <- function(pathways, sep="_", bias=NULL, clean=T, cleanII=T, removeIncluding="", removeThis=""){
 
   if(!is.null(bias)) pathways <- rep(pathways, round(bias))

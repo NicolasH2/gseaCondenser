@@ -40,5 +40,5 @@ library(gseaCondenser)
 library(wordcloud2)
 
 myfreq <- freqGsea(names(gseaCondenser::mySetlist))
-wordcloud2::wordcloud2(myfreq)
+wordcloud2(myfreq)
 }
