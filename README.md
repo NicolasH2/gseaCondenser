@@ -39,4 +39,4 @@ library(wordcloud2)
 myfreq <- freqGsea(names(gseaCondenser::mySetlist))
 wordcloud2::wordcloud2(myfreq)
 ```
-
+<img src="readme_files/wordcloud.png"/>
