@@ -36,7 +36,7 @@ freqGsea takes a vector of set names, cuts them up into pieces and returns a fre
 library(gseaCondenser)
 library(wordcloud2)
 
-myfreq <- freqGsea(names(gseaCondenser::mySetlist))
-wordcloud2::wordcloud2(myfreq)
+myfreq <- freqGsea(names(gseaCondenser::mySetlist)) # data set built into this package for demonstration purposes
+wordcloud2(myfreq)
 ```
 <img src="readme_files/wordcloud.png"/>
