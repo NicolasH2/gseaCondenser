@@ -1,12 +1,12 @@
 Package: gseaCondenser
 Type: Package
-Title: What the Package Does (Title Case)
+Title: condense GSEA information
+Depends: R (>= 3.6.0)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Nicolas Huber
+Maintainer: Nicolas Huber <info.huber@aol.de>
+Description: Condenses GSEA information for a better overview
+License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
