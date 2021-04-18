@@ -1,7 +1,5 @@
 # devtools::document()
 
-
-
 #' add redundancy information to a GSEA table
 #'
 #' @param gsea data.frame, where each row is a gene set and there is at least one column with a string for each row. This string contains all genes for that set
@@ -14,9 +12,9 @@
 #' library(gseaCondenser)
 #'
 #' gsea <- gseaCondenser::myGsea
-#' gsea <- condense_gsea(gsea, similarity=0.3)
+#' gsea <- condenseGsea(gsea, similarity=0.3)
 #' head(gsea)
-condense_gsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
+condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
   gsea$condenseID <- seq(nrow(gsea))
   gsea$condenseChildren <- ""
   genes <- strsplit(gsea[,colname], split=sep)
