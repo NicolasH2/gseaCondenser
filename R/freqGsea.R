@@ -38,12 +38,12 @@ freqGsea <- function(pathways, sep="_", bias=NULL, clean=T, cleanII=T, removeInc
 
   # remove certain terms
   if(clean){
-    discard <- c("the","to","from","with","an","and","or","of","off","on","by","via","in","kegg","go","reactome","pid")
+    discard <- c("the","to","from","with","an","and","or","of","off","on","by","via","in","kegg","go","reactome","pid","wp","biocarta")
     discard <- c(discard,removeIncluding)
     discard <- c(paste0("^",discard,"-"),paste0("-",discard,"-"),paste0("-",discard,"$"),paste0("^",discard,"$"))
   }
   discard2 <- ""
-  if(cleanII) discard2 <- c("a","activation","mediated","events","event","cell","cellular","activity","regulation","positive","negative","process","alpha","beta","gamma","delta",".","ii","iii","iv","v","vi","vii","viii","ix")
+  if(cleanII) discard2 <- c("a","activation","mediated","events","event","cell","cellular","activity","regulation","positive","negative","process","system","alpha","beta","gamma","delta",".","ii","iii","iv","v","vi","vii","viii","ix","up","dn","down")
   discard2 <- c(discard2, removeThis)
   discard2 <- c(paste0("^",discard2,"$"))
 
