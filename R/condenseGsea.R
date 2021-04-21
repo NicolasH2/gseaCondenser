@@ -60,7 +60,6 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
   })
   parent <- ifelse(is.na(parent), gsea$condenseID, parent) #if there is no parent, the child becomes its own parent
   gsea$condenseParentID <- unlist(parent)
-  gsea$condenseParentName <- gsea$pathway[gsea$condenseParentID]
   gsea$condenseSurvive <- ifelse(gsea$condenseID %in% eaten, FALSE, TRUE)
 
   return(gsea)
