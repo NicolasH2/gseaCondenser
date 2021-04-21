@@ -16,28 +16,52 @@
 #' head(gsea)
 condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
   gsea$condenseID <- seq(nrow(gsea))
-  gsea$condenseChildren <- ""
   genes <- strsplit(gsea[,colname], split=sep)
 
   #ratiomat will become matrix where each row is a set and each column is a set. The cells will contain the percentage of overlap between the sets.
-  ratiomat <- sapply(genes, function(x) sapply(genes, function(y) length(intersect(x,y)) ))
+  ratiomat <- sapply(genes, function(x) sapply(genes, function(y) length(intersect(x,y)) )) #first, the cells contain absolute numbers
   ratiomat <- as.data.frame(ratiomat)
   rownames(ratiomat) <- NULL
   colnames(ratiomat) <- seq(nrow(gsea))
-  ratiomat <- apply(ratiomat, 2, function(x) x/max(x))
+  ratiomat <- apply(ratiomat, 2, function(x) x/max(x)) #ratio is intersect of the sets vs. set size (of the column set)
+  ratiomat <- as.data.frame(ratiomat)
 
   #each time a similarity value reaches the threshold, the smaller set's ID is added to "eaten" and to the "condenseChildren" column of the bigger set
   eaten <- NA
-  for(i in seq(nrow(ratiomat))) {
+  gsea$condenseChildren <- ""
+  gsea$condenseParents <- ""
+  for(i in seq(nrow(ratiomat))) { #the ratio is intersect/n (number of genes of the column set), So j
     for(j in seq(ncol(ratiomat))){
+      #if the ratio of intersect and set size (of set j) is bigger than the ratio of intersect and set size (of set i), it means that set j is smaller. Thus, it will get eaten
       if(ratiomat[i,j]>similarity & ratiomat[i,j] > ratiomat[j,i]){ #by using >, sets do not eat themselves, and it is always the smaller set that gets eaten
-        gsea$condenseChildren[i] <- paste0(gsea$condenseChildren[i],",",j)
+        gsea$condenseChildren[i] <- paste0(gsea$condenseChildren[i],",",j) #the set that does not get eaten gets the ID of j for its Children column
+        gsea$condenseParents[j] <- paste0(gsea$condenseParents[j],",",i) # the set that does get eaten gets the ID of i for its Parent column
         eaten <- c(eaten,j) # just a vector, gathering all IDs from sets that were eaten
       }
     }
   }
-
   gsea$condenseChildren <- gsub("^,","",gsea$condenseChildren)
-  gsea$condenseDropout <- ifelse(gsea$condenseID %in% eaten, TRUE, FALSE)
+  gsea$condenseParents <- gsub("^,","",gsea$condenseParents)
+
+  parents <- strsplit(sapply(gsea$condenseParents, function(x) x), split=",")
+  parents <- lapply(parents, as.numeric)
+
+  #the best parent will be determined by which parent shares the most genes with the child
+  parent <- lapply(seq_along(parents), function(j) {
+    curparents <- parents[[j]]
+    if(length(curparents)==0){NA}else{ #for each row in gsea, extract the parents (j is the child)
+      overlaps <- sapply(curparents, function(i) ratiomat[j,i]) #extract overlap values for all parents (normalized by the set size of the child)
+      parent <- curparents[which(overlaps==max(overlaps))] #choose the parent with the highest overlap value. This could lead to several parents
+
+      overlaps2 <- ratiomat[ rep(j,length(parent)) , parent ] #extract overlap values for all parents (normalized by the set size of the parent)
+      parent <- ifelse(length(parent)==1, parent, parent[which(overlaps2==max(overlaps2))][1] ) #choose the parent with the highest overlap value. Still, this could leave several parents, which is why we just pick the first one
+      return(parent)
+    }
+  })
+  parent <- ifelse(is.na(parent), gsea$condenseID, parent) #if there is no parent, the child becomes its own parent
+  gsea$condenseParentID <- unlist(parent)
+  gsea$condenseParentName <- gsea$pathway[gsea$condenseParentID]
+  gsea$condenseSurvive <- ifelse(gsea$condenseID %in% eaten, FALSE, TRUE)
+
   return(gsea)
 }
