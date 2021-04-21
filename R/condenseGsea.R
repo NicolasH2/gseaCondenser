@@ -4,8 +4,11 @@
 #'
 #' @param gsea data.frame, where each row is a gene set and there is at least one column with a string for each row. This string contains all genes for that set
 #' @param colname string, naming the column in which the genes are listed
-#' @param sep charachter. What genes in the column string? E.g. if a cell of the column would look like "HOXA9,HOXA3", you need to set sep=","
+#' @param sep character. What genes in the column string? E.g. if a cell of the column would look like "HOXA9,HOXA3", you need to set sep=","
 #' @param similarity number, what has to be the minimum gene overlap between two terms in order for one to be regarded as redundant?
+#' @param n_finalParents integer, how many parents should there be among all pathways?
+#' @param finalParents string vector, name the pathways that should be parents; works only if idcol is defined
+#' @param idcol string, name of the column that contains the pathway names (only important for finalParents)
 #' @return data.frame similar to the input, but with 3 added columns: condenseID has a simple numeric ID for each row. condenseChildren lists the IDs of all sets that were eaten by this set. condenseDropout states whether or not this set was eaten itself.
 #' @export
 #' @examples
@@ -14,9 +17,9 @@
 #' gsea <- gseaCondenser::myGsea
 #' gsea <- condenseGsea(gsea, similarity=0.3)
 #' head(gsea)
-condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_finalParents=NULL){
-  if(!is.null(n_finalParents)){
-    message("Similarity cutoff will be ignored, because n_finalParents was defined!!!")
+condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_finalParents=NULL, finalParents=NULL, idcol=NULL){
+  if(!is.null(n_finalParents) | !is.null(finalParents)){
+    message("condenseGsea: Similarity cutoff will be ignored, because n_finalParents was defined!!!")
     similarity <- -1
   }
   gsea$condenseID <- seq(nrow(gsea))
@@ -32,10 +35,14 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
 
   # define possible parents (only needed in case n_finalParents is defined)
   possibleParents <- seq(nrow(gsea))
+  if(!is.null(finalParents)){
+    if(is.null(idcol)) stop("please provide a column name for the column containing the pathway names")
+    possibleParents <- which(gsea[,idcol] %in% finalParents)
+  }
   if(!is.null(n_finalParents)){
-    cumsim <- apply(ratiomat, 1, sum)
+    cumsim <- apply(ratiomat, 1, var)
     names(cumsim) <- seq_along(cumsim)
-    possibleParents <- as.numeric(tail(names(cumsim[order(cumsim)]), n_finalParents))
+    possibleParents <- as.numeric(head(names(cumsim[order(cumsim)]), n_finalParents)) #take those that have the least(!) variance in correlations
   }
 
   #each time a similarity value reaches the threshold, the smaller set's ID is added to "eaten" and to the "condenseChildren" column of the bigger set
@@ -45,7 +52,14 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
   for(i in seq(nrow(ratiomat))) { #the ratio is intersect/n (number of genes of the column set), So j
     for(j in seq(ncol(ratiomat))){
       #if the ratio of intersect and set size (of set j) is bigger than the ratio of intersect and set size (of set i), it means that set j is smaller. Thus, it will get eaten
-      if(ratiomat[i,j]>similarity & i %in% possibleParents  & (ratiomat[i,j] > ratiomat[j,i] | !j %in% possibleParents)){ #by using >, sets do not eat themselves, and it is always the smaller set that gets eaten
+      if(ratiomat[i,j]>similarity & #the similarity threshold has to be passed
+         i %in% possibleParents  &  # i has to be a listed
+         (
+           ratiomat[i,j] > ratiomat[j,i] | #the parent has to be bigger than the child (and not the two cannot be the same)
+           !j %in% possibleParents |       #if j is not listed, than i can be a parent even if it is smaller than j
+           (i==j & !is.null(finalParents))   #inormally a term does not become its own parent, but if it is one of the listed finalParents, it will be
+         )
+         ){ #by using >, sets do not eat themselves, and it is always the smaller set that gets eaten
         gsea$condenseChildren[i] <- paste0(gsea$condenseChildren[i],",",j) #the set that does not get eaten gets the ID of j for its Children column
         gsea$condenseParents[j] <- paste0(gsea$condenseParents[j],",",i) # the set that does get eaten gets the ID of i for its Parent column
         eaten <- c(eaten,j) # just a vector, gathering all IDs from sets that were eaten
@@ -59,7 +73,7 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
   parents <- lapply(parents, as.numeric)
 
   #the best parent will be determined by which parent shares the most genes with the child
-  parent <- lapply(seq_along(parents), function(j) {
+  parentdata <- lapply(seq_along(parents), function(j) {
     curparents <- parents[[j]]
     if(length(curparents)==0){NA}else{ #for each row in gsea, extract the parents (j is the child)
       overlaps <- sapply(curparents, function(i) ratiomat[j,i]) #extract overlap values for all parents (normalized by the set size of the child)
@@ -67,11 +81,13 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
 
       overlaps2 <- ratiomat[ rep(j,length(parent)) , parent ] #extract overlap values for all parents (normalized by the set size of the parent)
       parent <- ifelse(length(parent)==1, parent, parent[which(overlaps2==max(overlaps2))][1] ) #choose the parent with the highest overlap value. Still, this could leave several parents, which is why we just pick the first one
-      return(parent)
+      return(c(parent,max(overlaps)))
     }
   })
+  parent <- unlist(lapply(parentdata, function(x) x[1]))
   parent <- ifelse(is.na(parent), gsea$condenseID, parent) #if there is no parent, the child becomes its own parent
   gsea$condenseParentID <- unlist(parent)
+  gsea$condenseOverlapratio <- unlist(lapply(parentdata, function(x) x[2]))
   gsea$condenseSurvive <- ifelse(gsea$condenseID %in% eaten, FALSE, TRUE)
 
   return(gsea)

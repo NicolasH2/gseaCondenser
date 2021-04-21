@@ -9,7 +9,9 @@ condenseGsea(
   colname = "genes",
   sep = ",",
   similarity = 0.9,
-  n_finalParents = NULL
+  n_finalParents = NULL,
+  finalParents = NULL,
+  idcol = NULL
 )
 }
 \arguments{
@@ -17,9 +19,15 @@ condenseGsea(
 
 \item{colname}{string, naming the column in which the genes are listed}
 
-\item{sep}{charachter. What genes in the column string? E.g. if a cell of the column would look like "HOXA9,HOXA3", you need to set sep=","}
+\item{sep}{character. What genes in the column string? E.g. if a cell of the column would look like "HOXA9,HOXA3", you need to set sep=","}
 
 \item{similarity}{number, what has to be the minimum gene overlap between two terms in order for one to be regarded as redundant?}
+
+\item{n_finalParents}{integer, how many parents should there be among all pathways?}
+
+\item{finalParents}{string vector, name the pathways that should be parents; works only if idcol is defined}
+
+\item{idcol}{string, name of the column that contains the pathway names (only important for finalParents)}
 }
 \value{
 data.frame similar to the input, but with 3 added columns: condenseID has a simple numeric ID for each row. condenseChildren lists the IDs of all sets that were eaten by this set. condenseDropout states whether or not this set was eaten itself.
