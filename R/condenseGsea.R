@@ -14,7 +14,11 @@
 #' gsea <- gseaCondenser::myGsea
 #' gsea <- condenseGsea(gsea, similarity=0.3)
 #' head(gsea)
-condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
+condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_finalParents=NULL){
+  if(!is.null(n_finalParents)){
+    message("Similarity cutoff will be ignored, because n_finalParents was defined!!!")
+    similarity <- -1
+  }
   gsea$condenseID <- seq(nrow(gsea))
   genes <- strsplit(gsea[,colname], split=sep)
 
@@ -26,6 +30,14 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
   ratiomat <- apply(ratiomat, 2, function(x) x/max(x)) #ratio is intersect of the sets vs. set size (of the column set)
   ratiomat <- as.data.frame(ratiomat)
 
+  # define possible parents (only needed in case n_finalParents is defined)
+  possibleParents <- seq(nrow(gsea))
+  if(!is.null(n_finalParents)){
+    cumsim <- apply(ratiomat, 1, sum)
+    names(cumsim) <- seq_along(cumsim)
+    possibleParents <- as.numeric(tail(names(cumsim[order(cumsim)]), n_finalParents))
+  }
+
   #each time a similarity value reaches the threshold, the smaller set's ID is added to "eaten" and to the "condenseChildren" column of the bigger set
   eaten <- NA
   gsea$condenseChildren <- ""
@@ -33,7 +45,7 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9){
   for(i in seq(nrow(ratiomat))) { #the ratio is intersect/n (number of genes of the column set), So j
     for(j in seq(ncol(ratiomat))){
       #if the ratio of intersect and set size (of set j) is bigger than the ratio of intersect and set size (of set i), it means that set j is smaller. Thus, it will get eaten
-      if(ratiomat[i,j]>similarity & ratiomat[i,j] > ratiomat[j,i]){ #by using >, sets do not eat themselves, and it is always the smaller set that gets eaten
+      if(ratiomat[i,j]>similarity & i %in% possibleParents  & (ratiomat[i,j] > ratiomat[j,i] | !j %in% possibleParents)){ #by using >, sets do not eat themselves, and it is always the smaller set that gets eaten
         gsea$condenseChildren[i] <- paste0(gsea$condenseChildren[i],",",j) #the set that does not get eaten gets the ID of j for its Children column
         gsea$condenseParents[j] <- paste0(gsea$condenseParents[j],",",i) # the set that does get eaten gets the ID of i for its Parent column
         eaten <- c(eaten,j) # just a vector, gathering all IDs from sets that were eaten

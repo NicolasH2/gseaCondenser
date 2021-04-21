@@ -4,7 +4,13 @@
 \alias{condenseGsea}
 \title{add redundancy information to a GSEA table}
 \usage{
-condenseGsea(gsea, colname = "genes", sep = ",", similarity = 0.9)
+condenseGsea(
+  gsea,
+  colname = "genes",
+  sep = ",",
+  similarity = 0.9,
+  n_finalParents = NULL
+)
 }
 \arguments{
 \item{gsea}{data.frame, where each row is a gene set and there is at least one column with a string for each row. This string contains all genes for that set}
