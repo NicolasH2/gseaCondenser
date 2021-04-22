@@ -35,7 +35,7 @@ The data.frame now contains few additional columns:
 - cEve: boolean value, stating if the term has no parents (except itself)
 - cMother: name of the mother set. This is only given if the user defines idcol
 
-Let's plot the data to get an impression of the grouping. In ggplot, we use the cMother column for the coloring
+Let's plot the data to get an impression of the grouping. In [ggplot2](https://ggplot2.tidyverse.org/), we use the cMother column for the coloring
 
 ```r
 library(ggplot2)
