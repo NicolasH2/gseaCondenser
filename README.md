@@ -16,17 +16,62 @@ devtools::install_github("nicolash2/ggbrace")
 
 # condenseGSEA
 
-condenseGsea takes a data.frame that must have a column with genes. Those could be all genes that were found or all genes that are in the set or just the leading edge. condenseGsea will return the same data.frame but with 3 additional columns, most important of all the column condenseDropout, which signals if this set is redundant. Terms are redundant if they share enough genes with another set. The smaller set (in terms of how many genes it has) will always be eaten up by the bigger set and become redunant. Which sets have been consumed by a set is listed in the condenseChildren column. The numbers in it refer to the condenseID that the set was given (arbitrary numbering).
+condenseGsea takes a data.frame that must have a column with genes. Those could be all genes that were found or all genes that are in the set or just the leading edge. condenseGsea will return the same data.frame but with additional columns that give information about the parent-child relation between terms. Terms are related if they share enough genes with another set. The smaller set (in terms of how many genes it has) will normally be the child of the bigger set. However, the user can also define certain sets to be parents, in which case the will be the only parents around, and all other terms will become their children.
 
 ``` r
 library(gseaCondenser)
 
-gsea <- gseaCondenser::myGsea                 # data set built into this package for demonstration purposes
-gsea <- condenseGsea(gsea, similarity=0.3)   # here we use a very low similarity threshold. 0.8-1 might be more appropriate in many cases
-head(gsea)
+gsea <- gseaCondenser::gseaTest                                # data set built into this package for demonstration purposes
+gsea0 <- condenseGsea(gsea, similarity=0.1, idcol="pathway")   # here we use a very low similarity threshold. 0.8-1 might be more appropriate in many cases
 ```
 
-The data.frame can now be filtered to only contain those that are TRUE for the condenseSurvive column. This will yield only non-redundant terms and thus you have cleaned up your GSEA. You can always go back and look into the condenseChildren column to see which terms are behind the non-redundant ones.
+The data.frame now contains few additional columns:
+
+- cID: arbitrary number to identify the set
+- cKids: cID of the sets that are considered children of this set
+- cParents: cID of the sets that are considered parents of this set
+- cMotherID: cID of the set that is considered the best parent (usually highest overlap)
+- cShared: Ratio of the number of overlapping genes to the number of genes in the set
+- cEve: boolean value, stating if the term has no parents (except itself)
+- cMother: name of the mother set. This is only given if the user defines idcol
+
+Let's plot the data to get an impression of the grouping. In ggplot, we use the cMother column for the coloring
+
+```r
+library(ggplot2)
+plotme <- function(x){
+  ggplot(x, aes(NES, pathway, size=pval, color=cMother)) +
+    geom_point() +
+    theme_classic()
+}
+
+plotme(gsea0)
+```
+<img src="readme_files/gsea_standard.png"/>
+
+We can define how many parents there should be (maximum).
+
+```r
+plotme(gsea1)
+```
+
+<img src="readme_files/gsea_nparents.png"/>
+
+Alternatively, we can define the sets that are parents manually.
+
+```r
+plotme(gsea2)
+```
+
+<img src="readme_files/gsea_specterms.png"/>
+
+Be aware in mind that defining n_finalParents or finalParents will force sets to be children of sets they might normally not have as parents. The similarity threshold will be disregarded (although n_finalParents uses it at first to determine suitable parents, so it is still important there).
+
+```r
+plotme(gsea2)
+```
+
+<img src="readme_files/gsea_specterms_filter.png"/>
 
 # freqGsea
 
