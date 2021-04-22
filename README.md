@@ -52,6 +52,7 @@ plotme(gsea0)
 We can define how many parents there should be (maximum).
 
 ```r
+gsea1 <- condenseGsea(gsea, similarity=0.1, idcol="pathway", n_finalParents=6)
 plotme(gsea1)
 ```
 
@@ -60,15 +61,19 @@ plotme(gsea1)
 Alternatively, we can define the sets that are parents manually.
 
 ```r
+gsea2 <- condenseGsea(gsea, idcol="pathway", finalParents = c("neutrophil degranulation",
+                                                              "proteolysis", 
+                                                              "adenylate cyclase-activating G protein-coupled receptor signaling pathway"))
 plotme(gsea2)
 ```
 
 <img src="readme_files/gsea_specterms.png"/>
 
 Be aware in mind that defining n_finalParents or finalParents will force sets to be children of sets they might normally not have as parents. The similarity threshold will be disregarded (although n_finalParents uses it at first to determine suitable parents, so it is still important there).
+In the next codechunk, we subset the data.frame, so that only terms with a similarity of 0.02 (which is already low) are in the plot. This throws out some terms that have almost 0 similarity with their parents.
 
 ```r
-plotme(gsea2)
+plotme(subset(gsea2, cShared>.02))
 ```
 
 <img src="readme_files/gsea_specterms_filter.png"/>
