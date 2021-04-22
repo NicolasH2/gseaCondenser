@@ -27,10 +27,10 @@ condenseGsea(
 
 \item{finalParents}{string vector, name the pathways that should be parents; works only if idcol is defined}
 
-\item{idcol}{string, name of the column that contains the pathway names (only important for finalParents)}
+\item{idcol}{string, name of the column that contains the pathway names; necessary for finalParents; if provided adds an additional column for the parent name}
 }
 \value{
-data.frame similar to the input, but with 3 added columns: condenseID has a simple numeric ID for each row. condenseChildren lists the IDs of all sets that were eaten by this set. condenseDropout states whether or not this set was eaten itself.
+data.frame similar to the input, but with 3 added columns: cID has a simple numeric ID for each row. cKids lists the IDs of all sets that are condensed under this set. cParents lists the possible parents for this set. cMotherID lists the sets that is the best possible parent among the parents. cMother is optionally added if idcol is provided. cEve states if the set has no parents. cShared gives the ratio of the overlap size (how many genes are shared between mother and child) versus the number of genes in the child term.
 }
 \description{
 add redundancy information to a GSEA table
@@ -38,7 +38,7 @@ add redundancy information to a GSEA table
 \examples{
 library(gseaCondenser)
 
-gsea <- gseaCondenser::myGsea
-gsea <- condenseGsea(gsea, similarity=0.3)
+gsea <- gseaCondenser::gseaTest
+gsea <- condenseGsea(gsea, similarity=0.1, idcol="pathway")
 head(gsea)
 }
