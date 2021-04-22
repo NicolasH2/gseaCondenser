@@ -26,7 +26,7 @@ gsea <- condenseGsea(gsea, similarity=0.3)   # here we use a very low similarity
 head(gsea)
 ```
 
-The data.frame can now be filtered for those terms that are FALSE for the condenseDropout column. This will yield only non-redundant terms and thus you have cleaned up your GSEA. You can always go back and look into the condenseChildren column to see which terms are behind the non-redundant ones.
+The data.frame can now be filtered to only contain those that are TRUE for the condenseSurvive column. This will yield only non-redundant terms and thus you have cleaned up your GSEA. You can always go back and look into the condenseChildren column to see which terms are behind the non-redundant ones.
 
 # freqGsea
 
