@@ -57,7 +57,7 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
          (
            ratiomat[i,j] > ratiomat[j,i] | #the parent has to be bigger than the child (and not the two cannot be the same)
            !j %in% possibleParents |       #if j is not listed, than i can be a parent even if it is smaller than j
-           (i==j & (!is.null(finalParents) | !is.null(n_finalParents))) |  #normally a term does not become its own parent, but if it is one of the listed finalParents, it will be
+           (i==j & (!is.null(finalParents) | !is.null(n_finalParents))) #normally a term does not become its own parent, but if it is one of the listed finalParents, it will be
          )
          ){ #by using >, sets do not eat themselves, and it is always the smaller set that gets eaten
         gsea$condenseChildren[i] <- paste0(gsea$condenseChildren[i],",",j) #the set that does not get eaten gets the ID of j for its Children column
