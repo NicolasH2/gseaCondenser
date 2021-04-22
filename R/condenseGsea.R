@@ -88,6 +88,7 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
   parent <- ifelse(is.na(parent), gsea$condenseID, parent) #if there is no parent, the child becomes its own parent
   gsea$condenseParentID <- unlist(parent)
   gsea$condenseOverlapratio <- unlist(lapply(parentdata, function(x) x[2]))
+  gsea$condenseOverlapratio <- ifelse(is.na(gsea$condenseOverlapratio), 1, gsea$condenseOverlapratio) # if there is no ratio, it is because the term is its own parent
   gsea$condenseSurvive <- ifelse(gsea$condenseID %in% eaten, FALSE, TRUE)
 
   return(gsea)
