@@ -58,7 +58,7 @@ plotme(gsea1)
 
 <img src="readme_files/gsea_nparents.png"/>
 
-Alternatively, we can define the sets that are parents manually.
+Alternatively, we can define the sets that are parents manually. This means that we don't have to set a similarity threshold. In any case the sets will get a one of the defined parents, namely the one with the highest overlap.
 
 ```r
 gsea2 <- condenseGsea(gsea, idcol="pathway", finalParents = c("neutrophil degranulation",
