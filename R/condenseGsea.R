@@ -50,7 +50,7 @@ condenseGsea <- function(gsea, colname="genes", sep=",", similarity=0.9, n_final
   #============================================
   # decide parentage again (only with top parents and with no similarity cutoff) if n_finalParents was specified
   if(!is.null(n_finalParents)){
-    possibleParents <- tail(sort(table(unlist(strsplit(gsea0$cParents, split=",")))), n_finalParents) # possibleParents are the current top parents
+    possibleParents <- tail(sort(table(unlist(strsplit(gsea$cParents, split=",")))), n_finalParents) # possibleParents are the current top parents
     similarity <- -1 #similarity is lifted to allow the possibleParents to take in all children
     gsea <- parentage(gsea=gsea, ratiomat=ratiomat, similarity=similarity, possibleParents=possibleParents,
                       finalParents=finalParents, n_finalParents=n_finalParents) #re-do the parentage process, so only possible parents are chosen
