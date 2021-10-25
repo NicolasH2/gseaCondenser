@@ -16,7 +16,7 @@ devtools::install_github("nicolash2/ggbrace")
 
 # condenseGSEA
 
-`condenseGsea` takes a data.frame where every row is a pathway and there must have a column with genes (each item in that row is a string where genes are separated by commas). Those could be all genes that were found or all genes that are in the set or just the leading edge. condenseGsea will return the same data.frame but with additional columns that give information about the parent-child relation between terms. Terms are related if they share enough genes with another set, namely if the percentage of shared genes crosses the `similarity` parameter. The smaller set (in terms of how many genes it has) will normally be the child of the bigger set.
+`condenseGsea` takes a data.frame where every row is a pathway and there must have a column with genes (each item in that row is a string where genes are separated by commas). Those could be all genes that were found or all genes that are in the pathway or just the leading edge. condenseGsea will return the same data.frame but with additional columns that give information about the parent-child relation between terms. Terms are related if they share enough genes with another pathway, namely if the percentage of shared genes crosses the `similarity` parameter. The smaller pathway (in terms of how many genes it has) will normally be the child of the bigger pathway.
 
 ``` r
 library(gseaCondenser)
@@ -27,13 +27,13 @@ gsea0 <- condenseGsea(gsea, colname="genes", similarity=0.1, idcol="pathway")   
 
 The data.frame now contains few additional columns:
 
-- cID: arbitrary number to identify the set
-- cKids: cID of the sets that are considered children of this set
-- cParents: cID of the sets that are considered parents of this set
-- cMotherID: cID of the set that is considered the best parent (usually highest overlap)
-- cShared: Ratio of the number of overlapping genes to the number of genes in the set
+- cID: arbitrary number to identify the pathway
+- cKids: cID of the pathways that are considered children of this pathway
+- cParents: cID of the pathways that are considered parents of this pathway
+- cMotherID: cID of the pathway that is considered the best parent (usually highest overlap)
+- cShared: Ratio of the number of overlapping genes to the number of genes in the pathway
 - cEve: boolean value, stating if the term has no parents (except itself)
-- cMother: name of the mother set. This is only given if the user defines idcol
+- cMother: name of the mother pathway. This is only given if the user defines idcol
 
 Let's plot the data to get an impression of the grouping. In [ggplot2](https://ggplot2.tidyverse.org/) we use the cMother column for the coloring. We see that defense response, cellular oxidant detoxification and antimicrobial humoral response are grouped under defense response. Also, platelet degranulation became the mother term for platelet degranulation and innate immune response.
 
@@ -58,7 +58,7 @@ plotme(gsea1)
 
 <img src="readme_files/gsea_nparents.png"/>
 
-Alternatively, we can manually define the parent sets. This means that we don't have to set a similarity threshold. In any case the sets will get one of the defined parents, namely the one with the highest overlap.
+Alternatively, we can manually define the parent pathways. This means that we don't have to pathway a similarity threshold. In any case the pathways will get one of the defined parents, namely the one with the highest overlap.
 
 ```r
 gsea2 <- condenseGsea(gsea, idcol="pathway", finalParents = c("neutrophil degranulation",
@@ -69,7 +69,7 @@ plotme(gsea2)
 
 <img src="readme_files/gsea_specterms.png"/>
 
-Be aware that defining `n_finalParents` or `finalParents` will force sets to be children of sets they might normally not have as parents. The similarity threshold will be disregarded (although `n_finalParents` uses it at first to determine suitable parents, so it is still important there).
+Be aware that defining `n_finalParents` or `finalParents` will force pathways to be children of pathways they might normally not have as parents. The similarity threshold will be disregarded (although `n_finalParents` uses it at first to determine suitable parents, so it is still important there).
 In the next codechunk, we subset the data.frame, so that only terms with a similarity of 0.02 (which is already low) are in the plot. This throws out some terms that have almost 0 similarity with their parents.
 
 ```r
@@ -80,7 +80,7 @@ plotme(subset(gsea2, cShared>.02))
 
 # freqGsea
 
-`freqGsea` takes a vector of set names, cuts them up into pieces and returns a frequency table of all words from the set names. This also includes word-combinations of words that directly follow one another in a single set name. By default some words will be removed ("of","via",etc.) but you can switch this off, or even add terms that you might want to omit. In this example the [wordcloud2](https://github.com/Lchiffon/wordcloud2) package is used to vizualize the result.
+`freqGsea` takes a vector of pathway names, cuts them up into pieces and returns a frequency table of all words from the pathway names. This also includes word-combinations of words that directly follow one another in a single pathway name. By default some words will be removed ("of","via",etc.) but you can switch this off, or even add terms that you might want to omit. In this example the [wordcloud2](https://github.com/Lchiffon/wordcloud2) package is used to vizualize the result.
 
 ``` r
 library(gseaCondenser)
