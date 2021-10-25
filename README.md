@@ -16,13 +16,13 @@ devtools::install_github("nicolash2/ggbrace")
 
 # condenseGSEA
 
-`condenseGsea` takes a data.frame where every row is a pathway and there must have a column with genes (each item in that row is a string where genes are separated by commas). Those could be all genes that were found or all genes that are in the set or just the leading edge. condenseGsea will return the same data.frame but with additional columns that give information about the parent-child relation between terms. Terms are related if they share enough genes with another set. The smaller set (in terms of how many genes it has) will normally be the child of the bigger set. However, the user can also define certain sets to be parents, in which case they will be the only parents, and all other terms will become their children.
+`condenseGsea` takes a data.frame where every row is a pathway and there must have a column with genes (each item in that row is a string where genes are separated by commas). Those could be all genes that were found or all genes that are in the set or just the leading edge. condenseGsea will return the same data.frame but with additional columns that give information about the parent-child relation between terms. Terms are related if they share enough genes with another set, namely if the percentage of shared genes crosses the `similarity` parameter. The smaller set (in terms of how many genes it has) will normally be the child of the bigger set.
 
 ``` r
 library(gseaCondenser)
 
 gsea <- gseaCondenser::gseaTest                                # data set built into this package for demonstration purposes
-gsea0 <- condenseGsea(gsea, similarity=0.1, idcol="pathway")   # here we use a very low similarity threshold. 0.8-1 might be more appropriate in many cases
+gsea0 <- condenseGsea(gsea, colname="genes", similarity=0.1, idcol="pathway")   # here we use a very low similarity threshold. 0.8-1 might be more appropriate in many cases
 ```
 
 The data.frame now contains few additional columns:
@@ -58,7 +58,7 @@ plotme(gsea1)
 
 <img src="readme_files/gsea_nparents.png"/>
 
-Alternatively, we can define the sets that are parents manually. This means that we don't have to set a similarity threshold. In any case the sets will get a one of the defined parents, namely the one with the highest overlap.
+Alternatively, we can manually define the parent sets. This means that we don't have to set a similarity threshold. In any case the sets will get one of the defined parents, namely the one with the highest overlap.
 
 ```r
 gsea2 <- condenseGsea(gsea, idcol="pathway", finalParents = c("neutrophil degranulation",
