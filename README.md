@@ -49,7 +49,7 @@ plotme(gsea0)
 ```
 <img src="readme_files/gsea_standard.png"/>
 
-We can define how many parents there should be (maximum).
+We can define how many parents should exist (maximum).
 
 ```r
 gsea1 <- condenseGsea(gsea, similarity=0.1, idcol="pathway", n_finalParents=6)
